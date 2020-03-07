@@ -5,7 +5,7 @@ Accounts, contacts, tasks (dubbed traces), and projects are stored in the databa
 CRM to track customer interaction as well as generate basic project management forms such as a WBS.
 
 Phase 0: API
-  - Develop a basic API for the CRM functionality.
+  - Develop a basic API for the CRM functionality. (Services.php)
 
 Phase 1: CRM
  - Read Customer Information From Database
