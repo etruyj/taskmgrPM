@@ -338,14 +338,14 @@ function storeToken($userId, $token, $pdo)
 {
 	// Stores the generated token in the user table
 	
-	$curTime = new Datetime("now");
-	$sql = "UPDATE TABLE users 
+	$curTime = new Datetime('now');
+	$sql = "UPDATE users 
 		SET userToken=:token, loginTime=:time 
 		WHERE user_id=:userID;";
 	$cmd = $pdo->prepare($sql);
 	$cmd -> execute(array(
 				":token"=>$token,
-				":time"=>$curTime->format('U'),
+				":time"=>$curTime->format('y-m-d H:i:s'),
 				":userID"=>$userId));
 }
 
@@ -355,8 +355,9 @@ function verifyToken($token, $pdo)
 	// and compares the current time against a 
 	// timestamp for timeout.
 
-	$curTime = new Datetime("now");
-	
+	$curTime = new Datetime('now');
+	$curTime = $curTime->format('y-m-d H:i:s');
+
 	$sql = "SELECT loginTime 
 		FROM users 
 		WHERE userToken=:token;";
@@ -367,7 +368,7 @@ function verifyToken($token, $pdo)
 	{
 		foreach($cmd as $user)
 		{
-			if($user['loginTime']<=($curTime-300))
+			if(($user['loginTime'] - $curTime)<=3000)
 			{
 				$result['msg'] = "Credentials are valid";
 				$result['code'] = 1;

@@ -13,24 +13,25 @@
 
 require 'headers/credentials.php';
 require 'headers/identityFunctions.php';
+require 'headers/getFunctions.php';
 
 $pdo = connectToDatabase();
 
-$options = json_decode($_POST['json']);
+var_dump($_POST);
 
 switch($_POST['cmd'])
 {
 	case "listAccountDetails":
-		$result = getAccountInfo($options['account_id'], $pdo);
+		$result = getAccountInfo($_POST['account_id'], $pdo);
 		break;
 	case "listAccounts":
 		$result = getAllAccounts($pdo);
 		break;
 	case "login":
-		$result = login($options['user'], $options['pass'], $pdo);
+		$result = login($_POST['user'], $_POST['pass'], $pdo);
 		break;
 	case "testToken";
-		$result = verifyToken($option['token'], $pdo);
+		$result = verifyToken($_POST['token'], $pdo);
 		break;
 }
 
@@ -45,7 +46,7 @@ switch($_POST['cmd'])
 
 if($_POST['cmd']!="login")
 {
-	$testCredentials = verifyToken($option['token'], $pdo);
+	$testCredentials = verifyToken($_POST['token'], $pdo);
 	if($testCredentials['code']<0)
 	{
 		$result = $testCredentials;
@@ -55,5 +56,4 @@ if($_POST['cmd']!="login")
 // Return the results in JSON format.
 header('Content-Type: application/json');
 echo json_encode($result);
-
 ?>

@@ -18,12 +18,12 @@
 function getAccountContacts($account_id, $pdo)
 {
 	$sql = "SELECT contacts.contact_id, contacts.first_name, 
-			contacts.last_name, contacts.position, 
-		FROM accounts
+			contacts.last_name, contacts.position 
+		FROM accounts 
 		INNER JOIN contacts 
 			ON accounts.account_id=contacts.account_id 
 		WHERE accounts.account_id=:accID 
-		ORDER BY contacts.last_name DESC;";
+		ORDER BY contacts.last_name ASC;";
 
 	$cmd = $pdo->prepare($sql);
 	$cmd -> execute(array(":accID"=>$account_id));
@@ -96,8 +96,8 @@ function getAccountInfo($account_id, $pdo)
 
 function getAccountProjects($account_id, $pdo)
 {
-	$sql = "SELECT projects.project_id, projects.project_name, 
-		FROM accounts
+	$sql = "SELECT projects.project_id, projects.project_name 
+		FROM accounts 
 		INNER JOIN projects 
 			ON accounts.account_id=projects.account_id 
 		WHERE accounts.account_id=:accID 
@@ -120,15 +120,16 @@ function getAccountProjects($account_id, $pdo)
 		$result = -1;
 	}
 
+	return $result;
 }
 
 function getAllAccounts($pdo)
 {
 	// returns a list of account names and ids
-	
+
 	$sql = "SELECT account_id, name  
-		FROM ACCOUNTS 
-		ORDER BY name DESC;";
+		FROM accounts  
+		ORDER BY name ASC;";
 	$cmd = $pdo->prepare($sql);
 	$cmd -> execute();
 

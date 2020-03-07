@@ -6,6 +6,11 @@ CRM to track customer interaction as well as generate basic project management f
 
 Phase 0: API
   - Develop a basic API for the CRM functionality. (Services.php)
+*Notes. I'm still inexperienced with RESTful programming. I can't
+figure out how to parse JSON data embedded in the body of the POSTMAN
+request. Since all data will be present in HTML forms, the API was
+developed to expect form data and return JSONs.* 
+
 
 Phase 1: CRM
  - Read Customer Information From Database
