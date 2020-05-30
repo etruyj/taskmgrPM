@@ -287,7 +287,7 @@ function login($user, $pass, $pdo)
 	{
 		foreach($cmd as $user)
 		{
-			if(!checkPassword($pass, $user['password']))
+			if(checkPassword($pass, $user['password']))
 			{
 				$token = generateToken();
 				storeToken($user['user_id'], $token, $pdo);
@@ -382,7 +382,7 @@ function verifyToken($token, $pdo)
 	}
 	else
 	{
-		$result['msg'] = "Unable to verify username.";
+		$result['msg'] = "Invalid token.";
 		$result['code'] = -1;
 
 	}
