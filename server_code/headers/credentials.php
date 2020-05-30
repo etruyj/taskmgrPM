@@ -3,9 +3,9 @@
 function connectToDatabase()
 {
 	$host = 'localhost';
-	$db = 'spectraPM';
-	$user = 'spectraDaemon';
-	$pass = '3v4nD!ck1n50nJUn3GL45g0w';
+	$db = 'databaseName';
+	$user = 'user';
+	$pass = 'passwd';
 
 	try
 	{
