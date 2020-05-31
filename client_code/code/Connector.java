@@ -1,67 +1,167 @@
-//=============================================================================
+//======================================================================================
 // Connector.java
-// 	This class contains all the curl functionality associated with 
-// 	managing the connection between this application and the remote
-// 	API. Operations include CURL HTTP requests, JSON encoding/decoding,
-// 	and password hashing.
+// 	This class handles all the connection requests between the client and the server.
+// 	It requires Google's gson, which is stored in the libraries sub-directory. 
 //
-// 	Variables
-// 	-- Host: the location of the server
-// 	-- Token: the authorization string associated with the session.
-//============================================================================
+// 	Compile
+// 	> javac -d ../classes -cp ../libraries/gson-2.8.6.jar Connector.java
+//======================================================================================
 
-import com.google.gson.*;
+import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
+import java.io.*;
 
-class Connector
+public class Connector
 {
-	private URL url;
+	String address;
+	URL server;
+	URLConnection dbCon;
+	Gson gson;
 
-	public Connector(String host) throws IOException
+	//===================================================
+	// Constructors
+	//===================================================
+
+	public Connector(String server)
 	{
-		Gson gson = new Gson();
-		String hostString = "http://" + host + "/Services.php";
-		url = new URL(hostString);
+		address = "http://" + server + "/Services.php";
+		gson = new Gson();
 	}
 
-	public String postJSON(String jsonInputString) throws IOException
+	//===================================================
+	// Functions
+	//===================================================
+
+	// API JSON Functions
+
+	public AccountAPI decodeAllAccountsCall(String output)
 	{
-		// Open the connection
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
-		con.setRequestMethod("POST");
-		con.setRequestProperty("Content-Type", "application/json; utf-8");
-		con.setRequestProperty("Accept", "application/json");
-		con.setDoOutput(true);
+		return gson.fromJson(output, AccountAPI.class);
+	}
 
-		// Create JSON string
-		// For Testing purpose
-//		String jsonInputString = "{\"user\": \"etruyj\", \"pass\": \"testpassword1\", \"cmd\": \"login\"}";
+	public ContactsAPI decodeContactsCall(String output)
+	{
+		return gson.fromJson(output, ContactsAPI.class);
+	}
 
-		// Write to Server
-		try(OutputStream os = con.getOutputStream())
+	public String decodeLoginCall(String output)
+	{
+		TokenAPI rJson = new TokenAPI();
+
+		rJson = gson.fromJson(output, TokenAPI.class);
+
+		if(rJson.getCode()>0)
 		{
-			byte[] input = jsonInputString.getBytes("utf-8");
-			os.write(input, 0, input.length);
+			return rJson.getToken();
 		}
-
-		// Read server response
-		try(BufferedReader br = new BufferedReader(
-					new InputStreamReader(con.getInputStream(), "utf-8")))
+		else
 		{
-			StringBuilder response = new StringBuilder();
-			String responseLine = null;
+			System.out.println(rJson.getMsg());
+			return "Incorrect";
+		}
+	}
 
-			while((responseLine = br.readLine()) != null)
+	public ProjectsAPI decodeProjectCall(String output)
+	{
+		return gson.fromJson(output, ProjectsAPI.class);
+	}
+
+	public TracesAPI decodeTracesCall(String output)
+	{
+		return gson.fromJson(output, TracesAPI.class);
+	}
+
+	public String generateAllAccountsString(String token)
+	{
+		String accountString = "{\"cmd\":\"listAccounts\", "
+					+ "\"token\": \"" + token + "\"}";
+		return accountString;
+	}
+
+	public String generateLoginString(String user, String pass)
+	{
+		String loginString = "{\"cmd\": \"login\", "
+					+ "\"user\":\"" + user + "\", "
+					+ "\"pass\":\"" + pass + "\"}";
+		return loginString;
+	}
+
+	public String generateProjectString(int acc_id, String token)
+	{
+		String projectString = "{\"cmd\": \"listAccountProjects\", "
+					+ "\"account_id\": \"" + acc_id + "\", "
+				       	+ "\"token\": \"" + token + "\"}";
+		return projectString;			
+	}
+
+	public String generateTraceContactsString(int acc_id, String token)
+	{
+		String contactsString = "{\"cmd\": \"listAccountContacts\", "
+					+ "\"account_id\": \"" + acc_id + "\", "
+				       	+ "\"token\": \"" + token + "\"}";
+		return contactsString;		
+	}
+
+	public String generateTracebyDateString(String date, String token)
+	{
+		String tracesString = "{\"cmd\": \"listTraces\", "
+					+ "\"day\": \"" + date + "\", "
+				       	+ "\"token\": \"" + token + "\"}";
+		return tracesString;
+	}
+
+	// API call functions
+
+	public String getResponse(String jsonInput)
+	{
+		String response = "EMPTY";
+		String output = "EMPTY";
+
+		try
+		{
+			server = new URL(address);
+
+			URLConnection cxn = server.openConnection();
+			cxn.setDoOutput(true);
+
+			OutputStreamWriter out = new OutputStreamWriter(cxn.getOutputStream());
+
+			out.write(jsonInput);
+			out.close();
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(cxn.getInputStream()));
+		
+			while((response = in.readLine()) != null)
 			{
-				response.append(responseLine.trim());
+				System.out.println(response);
+				output = response;
+				
 			}
-			return response.toString();
+	
+			in.close();
 		}
-	}	
+		catch(Exception e)
+		{
+			System.out.println(e);
+		}
+
+		return output;
+	}
+
+	public String postAPIRequest(String input)
+	{
+		String jsonOutput = "{\"msg\":\"Connection Failed\", \"code\": \"-1\"}";
+
+		try
+		{
+			jsonOutput = getResponse(input);
+		}
+		catch (Exception e)
+		{
+			System.out.println(e);
+		}
+
+		return jsonOutput;
+	}
 }
