@@ -72,6 +72,11 @@ public class Connector
 		return gson.fromJson(output, TracesAPI.class);
 	}
 
+	public TraceInfoAPI decodeTraceInfoCall(String output)
+	{
+		return gson.fromJson(output, TraceInfoAPI.class);
+	}
+
 	public String generateAllAccountsString(String token)
 	{
 		String accountString = "{\"cmd\":\"listAccounts\", "
@@ -95,6 +100,22 @@ public class Connector
 		return projectString;			
 	}
 
+	public String generateSaveTraceString(int trace_id, int acc_id, int cont_id, int proj_id, int durs, String type, String subj, String info, String token)
+	{
+		String saveString = "{\"cmd\": \"saveTrace\", "
+				+ "\"trace_id\": \"" + trace_id + "\", "
+				+ "\"account_id\": \"" + acc_id + "\", "
+				+ "\"contact_id\": \"" + cont_id + "\", "
+				+ "\"project_id\": \"" + proj_id + "\", "
+				+ "\"duration\": \"" + durs + "\", "
+				+ "\"type\": \"" + type + "\", "
+				+ "\"subject\": \"" + subj + "\", "
+				+ "\"text\": \"" + info + "\", "
+				+ "\"token\": \"" + token + "\"}";
+
+		return saveString;
+	}
+
 	public String generateTraceContactsString(int acc_id, String token)
 	{
 		String contactsString = "{\"cmd\": \"listAccountContacts\", "
@@ -107,6 +128,14 @@ public class Connector
 	{
 		String tracesString = "{\"cmd\": \"listTraces\", "
 					+ "\"day\": \"" + date + "\", "
+				       	+ "\"token\": \"" + token + "\"}";
+		return tracesString;
+	}
+
+	public String generateTraceInfoString(int id, String token)
+	{
+		String tracesString = "{\"cmd\": \"listTraceDetails\", "
+					+ "\"trace_id\": \"" + id + "\", "
 				       	+ "\"token\": \"" + token + "\"}";
 		return tracesString;
 	}

@@ -26,28 +26,37 @@ public class ContactsAPI extends APIResponseContainer
 		}	
 	}
 	public int getContactID(int i) { return contactList[i].id; }
-/*	public int getContactIDbyName(String cnt_name)
+	public int getContactIDbyName(String cnt_name)
 	{
+		// Split the full name back to the individual pieces. 
+		// Scan through the dropdown to find the right values.
 		int index = -1;
-
-		for(int i=0; i<this.getNum(); i++)
+		String[] name = cnt_name.split(", ");
+		
+		if(name.length > 0)
 		{
-			if(contactList[i].name.equals(cnt_name))
+			System.out.println(name[1] + " " + name[0]);
+
+			for(int i=0; i<this.getNum(); i++)
 			{
-				index = i;
+				if(contactList[i].last.equals(name[0]))
+				{
+					if(contactList[i].first.equals(name[1]))
+					{
+						index = contactList[i].id;
+					}
+				}
 			}
-		}
 
-		if(index>=0)
-		{
-			return getContactID(index);
 		}
 		else
 		{
-			return index;
+			System.out.println(cnt_name);
 		}
+
+		return index;
 	}
-*/	public String getFirstName(int i) { return contactList[i].first; }
+	public String getFirstName(int i) { return contactList[i].first; }
 	public String getFullName(int i) { return contactList[i].last + ", " + contactList[i].first; }
 	public String getPosition(int i) { return contactList[i].last; }
 

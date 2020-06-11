@@ -25,6 +25,7 @@ public class TracesAPI extends APIResponseContainer
 			this.setNum(0);
 		}	
 	}
+	public boolean getCompleted(int i) { return traceList[i].completed; }
 	public String getDate(int i) { return traceList[i].date; }
 	public String getSubject(int i) { return traceList[i].subject; }
 	public String getTime(int i) { return traceList[i].time; }
@@ -44,5 +45,6 @@ public class TracesAPI extends APIResponseContainer
 		public String duration = "0";
 		public String type = "none";
 		public String subject  = "none";
+		public boolean completed = false;
 	}
 }
