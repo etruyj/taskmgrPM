@@ -18,7 +18,8 @@
 function getAccountContacts($accountID, $pdo)
 {
 	$sql = "SELECT contacts.contact_id, contacts.first_name, 
-			contacts.last_name, contacts.position 
+			contacts.last_name, contacts.position, 
+			contacts.email, contacts.phone  
 		FROM accounts 
 		INNER JOIN contacts 
 			ON accounts.account_id=contacts.account_id 
@@ -104,7 +105,7 @@ function getAccountProjects($account_id, $pdo)
 		INNER JOIN projects 
 			ON accounts.account_id=projects.account_id 
 		WHERE accounts.account_id=:accID 
-		ORDER BY projects.project_name DESC;";
+		ORDER BY projects.project_name ASC;";
 
 	$cmd = $pdo->prepare($sql);
 	$cmd -> execute(array(":accID"=>$account_id));
@@ -118,6 +119,7 @@ function getAccountProjects($account_id, $pdo)
 		{
 			$result['projectList'][$i]['id'] = $res['project_id'];
 			$result['projectList'][$i]['name'] = $res['project_name'];
+			$i++;
 		}
 	}
 	else
@@ -147,7 +149,7 @@ function getAllAccounts($pdo)
 		foreach($cmd as $account)
 		{
 			$result['accountList'][$i]["id"] = $account['account_id'];
-			$result['accountList'][$i]["account"] = $account['name'];
+			$result['accountList'][$i]["name"] = $account['name'];
 			$i++;
 		}
 	}
@@ -160,66 +162,47 @@ function getAllAccounts($pdo)
 	return $result;
 }
 
-function getAllAccountsAllContactsAllProjects($pdo)
+function getAllAccountsFromSearch($query, $pdo)
 {
-	$sql = 	"SELECT accounts.name, contacts.first_name, ";
-	$sql .= "	contacts.last_name, projects.project_name ";
-	$sql .= "FROM accounts ";
-	$sql .= "INNER JOIN contacts ";
-	$sql .= "	ON contacts.account_id=accounts.account_id ";
-	$sql .= "INNER JOIN projects ";
-	$sql .= "	ON projects.account_id=accounts.account_id ";
-	$sql .= "ORDER BY accounts.name ASC;";
+	// Perform a seach function to allow easier searching for accounts in system.
+	$sql = "SELECT * FROM accounts ";
+	$sql .= "WHERE name LIKE :query ";
+	$sql .= "ORDER BY name ASC;";
+
+	$query .= "%"; // Appending a wildcard to the back of the query to allow for searching
 
 	$cmd = $pdo->prepare($sql);
-       	$cmd->execute();
+	$cmd->execute(array(":query"=>$query));
 
 	if($cmd->rowCount()>0)
 	{
-		$name = "none";
-		$i = -1;
-		$c = 0;
-		$p = 0;
-		$result['msg'] = "Account query successful";
+		$result['msg'] = "Account list successfully retrieved.";
 		$result['code'] = 1;
+		$i = 0;
 		foreach($cmd as $account)
 		{
-			if($account['account_name']!=$name)
-			{
-				$i++;
-				$name = $account['account_name'];
-			}
-
-			$result['accounts'][$i]['name'] = $account['account_name'];
-			$result['accounts'][$i]['contacts']['c'] = $account['account_name'];
+			$result['accountList'][$i]["id"] = $account['account_id'];
+			$result['accountList'][$i]["name"] = $account['name'];
+			$i++;
 		}
 	}
 	else
 	{
-		$result['msg'] = "Unable to find account information.";
+		$result['msg'] = "No accounts found.";
+		$result['msg'] = $sql;
 		$result['code'] = -1;
-	}	
+	}
+
+	return $result;
 }
 
 function getTracesByDate($day, $pdo)
 {
-	$sql = "SELECT traces.trace_id, date, time, duration, type, ";
-	$sql .=		"accounts.name, contacts.first_name, ";
-	$sql .=		"contacts.last_name, projects.project_name, ";
-	$sql .=		"subjects.subject, text.text ";
+	$sql = "SELECT traces.trace_id, traces.date, traces.time, traces.duration, ";
+	$sql .= "traces.type, subjects.subject, traces.completed ";
 	$sql .=	"FROM traces ";
-	$sql .=	"INNER JOIN accounts "; 
-	$sql .=		"ON accounts.account_id=traces.account_id ";
-	$sql .=	"INNER JOIN contacts "; 
-	$sql .=		"ON contacts.contact_id=traces.contact_id ";
-	$sql .=	"INNER JOIN projects ";
-	$sql .=		"ON projects.project_id=traces.project_id ";
-	$sql .=	"INNER JOIN users ";
-	$sql .=		"ON users.user_id=traces.user_id ";
 	$sql .=	"INNER JOIN subjects ";
 	$sql .=		"ON subjects.subject_id=traces.subject_id ";
-	$sql .=	"INNER JOIN text ";
-	$sql .=		"ON text.text_id=traces.text_id ";
 	$sql .=	"WHERE date=:day ";
 	$sql .=	"ORDER BY time ASC;";
 
@@ -239,17 +222,23 @@ function getTracesByDate($day, $pdo)
 			$result['traceList'][$i]['time'] = $trace['time'];	
 			$result['traceList'][$i]['duration'] = $trace['duration'];	
 			$result['traceList'][$i]['type'] = $trace['type'];	
-			$result['traceList'][$i]['account_name'] = $trace['name'];	
-			$result['traceList'][$i]['contact_first'] = $trace['first_name'];	
-			$result['traceList'][$i]['contact_last'] = $trace['last_name'];	
-			$result['traceList'][$i]['project_name'] = $trace['project_name'];	
 			$result['traceList'][$i]['subject'] = $trace['subject'];
-			$result['traceList'][$i]['text'] = $trace['text'];
+
+			// Having problems with Java and PHP reading each other's boolean
+			// values. Manually converting boolean to int and int to true/false.
+			if($trace['completed']==1)
+			{
+				$result['traceList'][$i]['completed'] = true;
+			}
+			else
+			{
+				$result['traceList'][$i]['completed'] = false;
+			}
 			$i++;	
 		}
 	}
 	else
-	{
+	{	
 		$result['msg'] = "There are no traces for this date.";
 		$result['code'] = -1;
 	}
@@ -300,7 +289,18 @@ function getTraceDetails($traceKey, $pdo)
 			$result['project_name'] = $trace['project_name'];
 			$result['subject'] = $trace['subject'];
 			$result['text'] = $trace['text'];
-			$result['completed'] = $trace['completed'];
+
+			// Having problems with Java and PHP handling each other's
+			// boolean values. Have to manually convert Java to int and
+			// int to true/false.
+			if($trace['completed'] == 1)
+			{
+				$result['completed'] = true;
+			}
+			else
+			{
+				$result['completed'] = false;
+			}
 		}
 	}
 	else
