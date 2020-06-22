@@ -42,6 +42,7 @@ public class TraceInfoAPI extends APIResponseContainer
 	public void setTraceID(int id) { trace_id = id; }
 	public void setDate(String day) { date = day; }
 	public void setTime(String t) { time = t; }
+	public void setType(String t) { type = t; }
 	public void setDuration(String d) { duration = d; }
 	public void setAccount(String a) { account = a; }
 	public void setContact(String fullName)

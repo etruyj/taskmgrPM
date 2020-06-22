@@ -28,7 +28,6 @@ public class TaskListPane extends JPanel
 	private JButton changeDateBTN;
 	private JButton newTaskBTN;
 	private JTextField dateField;
-//	private JTextArea scheduleArea;
 	private JPanel scheduleArea;
 
 	// System Variables
@@ -46,8 +45,6 @@ public class TaskListPane extends JPanel
 		changeDateBTN = new JButton("Change Date");
 		newTaskBTN = new JButton("New Task");
 		dateField.setText(sesh.getCurrentDate());
-//		scheduleArea = new JTextArea(30, 35);
-//		scheduleArea.setEditable(false);
 		scheduleArea = new JPanel();
 		scheduleArea.setSize(100, 200);
 		scheduleArea.setBackground(Color.white);
@@ -112,6 +109,13 @@ public class TaskListPane extends JPanel
 		newTaskBTN.addActionListener(lis);
 	}
 
+	public void refreshWelcomeMessage(Session sesh)
+	{
+		welcomeMessage.setText("Welcome " + sesh.getUsername() + ", "
+				+ "Today's date is " + sesh.getToday() + ".");
+		
+	}
+
 	public void updateTraceList(Session sesh, MouseListener mis, Connector cx)
 	{
 		// Get Traces From Database
@@ -122,6 +126,8 @@ public class TaskListPane extends JPanel
 
 		traceList = cx.decodeTracesCall(output);
 		traceList.count();
+
+		scheduleArea.removeAll();
 
 		// Update the text area
 		if(traceList.getCode()>0)

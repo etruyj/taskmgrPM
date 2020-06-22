@@ -1,409 +1,312 @@
-//=============================================================================
-// taskDetailPane.java
-// 	This is the detailed screen for each of the traces. It is where traces
-// 	are edited, updated, and created.
-//=============================================================================
+//======================================================================================
+// TaskDetailPane.java
+//	This screen shows the detailed information for the trace. It also the screen
+//	where traces are created. 
+//======================================================================================
 
-import com.google.gson.Gson;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.JTextArea;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 
-public class taskDetailPane extends JPanel
+import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+
+public class TaskDetailPane extends JPanel
 {
-	private JComboBox<String> listOfAccounts;
-	private JComboBox<String> listOfContacts;
-	private JComboBox<String> listOfProjects;
-	private JComboBox<String> traceTypeList;
-
+	// GUI Components
+	private JComboBox listOfAccounts;
+	private JComboBox listOfContacts;
+	private JComboBox listOfProjects;
+	private JComboBox listOfTypes;
 	private JTextField dateField;
 	private JTextField timeField;
-	private JTextField subjectField;
 	private JTextField durationField;
-
+	private JTextField subjectField;
+	private JTextArea detailArea;
 	private JCheckBox completeBox;
+	
+	private JButton newTrace;
+	private JButton saveTrace;
+	private JButton cancelTrace;
 
-	private JTextArea detailsArea;
+	// API Containers
+	private AccountAPI accountList;
+	private ContactsAPI contactList;
+	private ProjectsAPI projectList;
+	private TraceInfoAPI details;
 
-	private JButton newTask;
-	private JButton saveTask;
-	private JButton cancelTask;
 
-	// Container for the API call results.
-	private traceInfo details; 
-
-	// Drop-Down Box Arrays
-	private String[] traceTypes;
-	private accountList accounts;
-	private contactList contacts;
-	private projectList projects;
-	private int numTraceTypes;
-
-	public taskDetailPane()
+	public TaskDetailPane()
 	{
-		setLayout(new BorderLayout());
+		// Variable Definition
+		details = new TraceInfoAPI();
 
-		// Set Drop-Down Box Options
-		traceTypes = new String[] {"Email", "Meeting - In-Person", "Meeting - Remote", "Paperwork", "Phone Call"};
-		numTraceTypes = 5;
+		// Component Definitions
+		String[] traceTypes = {"Email", "Installation", "Meeting - In Person", "Meeting - Virtual", "Project Work", "Support"};
 
-		// Arrange Top Bar
-		JPanel topbar = new JPanel();
-		topbar.setLayout(new FlowLayout());
-
-		// Configurat the dropdown boxes
-		listOfAccounts = new JComboBox<> ();
+		listOfAccounts = new JComboBox();
 		listOfAccounts.addItem("Account Name");
-		listOfContacts = new JComboBox<> ();
+		listOfContacts = new JComboBox();
 		listOfContacts.addItem("Contact Name");
-		listOfProjects = new JComboBox<> ();
+		listOfProjects = new JComboBox();
 		listOfProjects.addItem("Project Name");
+		listOfTypes = new JComboBox(traceTypes);
 
-		// Add components to topbar
-		topbar.add(listOfAccounts);
-		topbar.add(listOfContacts);
-		topbar.add(listOfProjects);
+		dateField = new JTextField(8);
+		timeField = new JTextField(5);
+		durationField = new JTextField(2);
+		subjectField = new JTextField(20);
 
-		add(topbar, BorderLayout.NORTH);
+		detailArea = new JTextArea(20, 30);
 
-		// Arrange Center Bar
-		JPanel centerbar = new JPanel();
-		centerbar.setLayout(new FlowLayout());
+		completeBox = new JCheckBox("Completed");
 
-		dateField = new JTextField(7);
-		timeField = new JTextField(7);
-		durationField = new JTextField(3);
-		traceTypeList = new JComboBox<> (traceTypes);
-		completeBox = new JCheckBox("Complete");
-		subjectField = new JTextField(35);
+		newTrace = new JButton("New Trace");
+		saveTrace = new JButton("Save");
+		cancelTrace = new JButton("Cancel");
 
-		// Add components to centerbar
-		centerbar.add(dateField);
-		centerbar.add(timeField);
-		centerbar.add(durationField);
-		centerbar.add(traceTypeList);
-		centerbar.add(subjectField);
-		centerbar.add(completeBox);
-
-		add(centerbar, BorderLayout.CENTER);
-
-		// Arrange Bottom Bar
-		JPanel bottombar = new JPanel();
-		bottombar.setLayout(new BorderLayout());
+		// JPanel Layout
+		setLayout(new BorderLayout());
 		
-		JPanel buttonbar = new JPanel();
-		buttonbar.setLayout(new FlowLayout());
+		// Configure Top Panel
+		JPanel topPanel = new JPanel();
+		JPanel topSub1 = new JPanel();
+		JPanel topSub2 = new JPanel();
+		JPanel topSub3 = new JPanel();
 
-		detailsArea = new JTextArea(25, 1);
-		detailsArea.setWrapStyleWord(true);
-		bottombar.add(detailsArea, BorderLayout.CENTER);
+		topPanel.setLayout(new GridLayout(3, 1));
+		topSub1.setLayout(new FlowLayout());
+		topSub2.setLayout(new FlowLayout());
+		topSub3.setLayout(new FlowLayout());
 
-		// Bottom buttons
-		newTask = new JButton("New");
-		saveTask = new JButton("Save");
-		cancelTask = new JButton("Cancel");
+		topSub1.add(listOfAccounts);
+		topSub1.add(listOfContacts);
+		topSub1.add(listOfProjects);
 
-		buttonbar.add(newTask);
-		buttonbar.add(saveTask);
-		buttonbar.add(cancelTask);
+		topSub2.add(dateField);
+		topSub2.add(timeField);
+		topSub2.add(durationField);
+		topSub2.add(listOfTypes);
 
-		bottombar.add(buttonbar, BorderLayout.SOUTH);
+		topSub3.add(subjectField);
+		topSub3.add(completeBox);
 
-		add(bottombar, BorderLayout.SOUTH);
+		topPanel.add(topSub1);
+		topPanel.add(topSub2);
+		topPanel.add(topSub3);
+
+		add(topPanel, BorderLayout.NORTH);
+
+		// Configure Center Panel
+		add(detailArea, BorderLayout.CENTER);
+
+		// Configure Bottom Panel
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.setLayout(new FlowLayout());
+
+		bottomPanel.add(newTrace);
+		bottomPanel.add(saveTrace);
+		bottomPanel.add(cancelTrace);
+
+		add(bottomPanel, BorderLayout.SOUTH);
 	}
-
-	//========================================================
+	
+	//======================================================
 	// Functions
-	//========================================================
+	//======================================================
 
-	public void addAccountListener(ActionListener lis)
+	public void addDropDownListener(ActionListener lis)
 	{
 		listOfAccounts.addActionListener(lis);
 	}
 
-	public void addButtonListener(String command, ActionListener lis)
+	public void addBTNListener(ActionListener lis)
 	{
-		switch(command)
-		{
-			case "newTask":
-				newTask.addActionListener(lis);
-				break;
-			case "saveTask":
-				saveTask.addActionListener(lis);
-				break;
-			case "cancelTask":
-				cancelTask.addActionListener(lis);
-				break;
-		}
+		newTrace.addActionListener(lis);
+		saveTrace.addActionListener(lis);
+		cancelTrace.addActionListener(lis);
 	}
 
-	public void getAccountContactList(Session sesh, int account)
+	public int getAccountID(String acc_name)
 	{
-		Gson gson = new Gson();
-
-		String jsonOutput = "{\"msg\": \"connection error\", \"code\": -1}";
-		String jsonInput = "{\"cmd\": \"listAccountContacts\", \"account_id\": \""
-					+ account + "\", \"token\": \"" 
-					+ sesh.getToken() + "\"}";
-		
-		// Try the connection
-		try
-		{
-			Connector con = new Connector(sesh.getServer());
-			jsonOutput = con.postJSON(jsonInput);
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-
-		contacts = gson.fromJson(jsonOutput, contactList.class);
-		contacts.count();
-
-		// Load the contacts drop-down
-
-		// Clear any prior artifacts.
-		// Using the same method as getAccountList to perform this task
-		// for consistency.
-		while(listOfContacts.getItemCount()>1)
-		{
-			listOfContacts.removeItemAt(1);
-		}
-
-		// Add all names to the list.
-		for(int i=0; i<contacts.getNumContacts(); i++)
-		{
-			listOfContacts.addItem(contacts.getFullName(i));
-		}
+		return accountList.getAccountIDbyName(acc_name);
 	}
 
-	public void getAccountList(Session sesh)
+	public void getAccounts(Session sesh, Connector cx)
 	{
-		Gson gson = new Gson();
+		// Get accounts from database
+		String cmdString;
+	       	String output;
+	
+		cmdString = cx.generateAllAccountsString(sesh.getToken());
+		output = cx.postAPIRequest(cmdString);
+		accountList = cx.decodeAllAccountsCall(output);
+		accountList.count();
 
-		String jsonOutput = "{\"msg\": \"connection error\", \"code\": -1}";
-		String jsonInput = "{\"cmd\": \"listAccounts\", \"token\": \"" + sesh.getToken() + "\"}";
-		
-		// Try the connection
-		try
-		{
-			Connector con = new Connector(sesh.getServer());
-			jsonOutput = con.postJSON(jsonInput);
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-
-		accounts = gson.fromJson(jsonOutput, accountList.class);
-		accounts.count();
-
-		// Load the account drop-down
-		
-		// Clear any prior artifacts.
-		// The event listener attached to this combobox prevents the
-		// use of removeAllItems(). Using this function results in 
-		// runtime errors.
-		
+		// Load the JComboBox with the accounts. This has to be
+		// done in a weird way to ensure there is always data in
+		// the combobox. Since there is a listener attached to
+		// the combobox, a removeAll commands results in an error.
 		while(listOfAccounts.getItemCount()>1)
 		{
 			listOfAccounts.removeItemAt(1);
 		}
 
-		// Add all account names to the list.
-		for(int i=0; i<accounts.getNumAccounts(); i++)
+		for(int i=0; i<accountList.getNum(); i++)
 		{
-			listOfAccounts.addItem(accounts.getAccountName(i));
+			listOfAccounts.addItem(accountList.getAccountName(i));
+		}
+
+	}
+
+	public void getContacts(int acc_id, Session sesh, Connector cx)
+	{
+		// Get contacts from database
+		String cmdString;
+		String output;
+
+		cmdString = cx.generateTraceContactsString(acc_id, sesh.getToken());
+	       	output = cx.postAPIRequest(cmdString);
+		contactList = cx.decodeContactsCall(output);
+		contactList.count();	
+
+		// Load the JComboBox with the contacts. This method is used
+		// instead of removeAll() to keep things in line with loading
+		// the Accounts JComboBox
+
+		while(listOfContacts.getItemCount()>1)
+		{
+			listOfContacts.removeItemAt(1);
+		}
+		for(int i=0; i<contactList.getNum(); i++)
+		{	
+			listOfContacts.addItem(contactList.getFullName(i));
 		}
 	}
 
-	public void getAccountProjectList(Session sesh, int account)
+	public void getProjects(int acc_id, Session sesh, Connector cx)
 	{
-		Gson gson = new Gson();
+		// get projects from database
+		String cmdString;
+		String output;
 
-		String jsonOutput = "{\"msg\": \"connection error\", \"code\": -1}";
-		String jsonInput = "{\"cmd\": \"listAccountProjects\", \"account_id\": \""
-					+ account + "\", \"token\": \"" 
-					+ sesh.getToken() + "\"}";
-		
-		// Try the connection
-		try
-		{
-			Connector con = new Connector(sesh.getServer());
-			jsonOutput = con.postJSON(jsonInput);
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
+		cmdString = cx.generateProjectString(acc_id, sesh.getToken());
+		output = cx.postAPIRequest(cmdString);
+		projectList = cx.decodeProjectCall(output);
+		projectList.count();
 
-		projects = gson.fromJson(jsonOutput, projectList.class);
-		projects.count();
+		// Load the JComboBox with the projects. This method is used
+		// instead of removeAll() to keep things in line with loading
+		// the Accounts JComboBox
 
-		// Load the contacts drop-down
-
-		// Clear any prior artifacts.
-		// Using the same method as getAccountList to perform this task
-		// for consistency.
 		while(listOfProjects.getItemCount()>1)
 		{
 			listOfProjects.removeItemAt(1);
 		}
 
-		// Add all names to the list.
-		for(int i=0; i<projects.getNumProjects(); i++)
+		for(int i=0; i<projectList.getNum(); i++)
 		{
-			listOfProjects.addItem(projects.getProject(i));
+			listOfProjects.addItem(projectList.getProjectName(i));
 		}
-
 	}
 
-	public void loadFreshInfo(Session sesh)
+	public void loadExistingTrace(int trace_id, Session sesh, Connector cx)
 	{
-		//===========================================
-		// loadFreshInfo
-		// 	Load the detail page with an empty template
-		// 	for use with the creation of new traces.
-		//===========================================
+		System.out.println(details.getCompleted());
+		
+		// Get trace details
+		String cmdString;
+		String output;
 
-		// Prep the template.
-		getAccountList(sesh);
+		cmdString = cx.generateTraceInfoString(trace_id, sesh.getToken());
+		output = cx.postAPIRequest(cmdString);
+		details = cx.decodeTraceInfoCall(output);
 
-		// Load the page
-		listOfAccounts.setSelectedIndex(0);
-		listOfContacts.setSelectedIndex(0);
-		listOfProjects.setSelectedIndex(0);
-		traceTypeList.setSelectedIndex(0);
-		dateField.setText(sesh.getCurDate());
-		timeField.setText("12:00");
-		durationField.setText("5");
-		subjectField.setText("");
-		detailsArea.setText("");
-		completeBox.setSelected(false);
+		// Load dropdowns
+		getAccounts(sesh, cx);
+		listOfAccounts.setSelectedItem(details.getAccount());
+		listOfContacts.setSelectedItem(details.getContact());
+		listOfProjects.setSelectedItem(details.getProject());
+		listOfTypes.setSelectedItem(details.getType());
 
-		// Reset the traceInfo (details)
-		details.newTrace(sesh);
+		// Populate fields
+		dateField.setText(details.getDate());
+		timeField.setText(details.getTime());
+		durationField.setText(details.getDuration());
+		subjectField.setText(details.getSubject());
+		detailArea.setText(details.getText());
+		completeBox.setSelected(details.getCompleted());	
+	}
+	
+	public void loadFreshTrace(Session sesh, Connector cx)
+	{
+		getAccounts(sesh, cx);
+	
+		details.newDetails();
 
+		dateField.setText(sesh.getCurrentDate());
+		timeField.setText(details.getTime());
+		durationField.setText(details.getDuration());
+		subjectField.setText(details.getSubject());
+		detailArea.setText(details.getText());
+		completeBox.setSelected(details.getCompleted());
 	}
 
-	public void loadTraceInfo(Session sesh, String trace_id)
+	public void saveTrace(Session sesh, Connector cx)
 	{
-		//===========================================
-		// loadTraceInfo
-		// Get trace details from the database and load
-		// them into the template.
-		//===========================================
+		String cmdString;
+		String output;
 
-		// Prep the template.
-		getAccountList(sesh);
+		writeToDetails();
 
-		// Get the trace information.
-		Gson gson = new Gson();
+		cmdString = cx.generateSaveTraceString(details.getTraceID(), accountList.getAccountIDbyName(details.getAccount()), contactList.getContactIDbyName(details.getContact()), projectList.getProjectIDbyName(details.getProject()), Integer.valueOf(details.getDuration()), details.getDate(), details.getTime(), details.getType(), details.getSubject(), details.getText(), details.getCompleted(), sesh.getToken());
 
-		String jsonOutput = "{\"msg\": \"connection error\", \"code\": -1}";
-		String jsonInput = "{\"cmd\": \"listTraceDetails\", \"trace_id\": \""
-			+ trace_id + "\", \"token\": \"" + sesh.getToken() + "\"}";
-		// Try the connection
-		try
+		System.out.println(cmdString);
+
+		output = cx.postAPIRequest(cmdString);
+	}
+
+	public int writeToDetails()
+	{
+		// Write the field values to the details variable.
+		// This allows for consolidating changes to the traces as
+		// all updates and refreshing comes from this variable.
+		// The goal is to provide consistent behavior
+		
+		if(listOfAccounts.getSelectedItem().equals("Account Name") || listOfContacts.getSelectedItem().equals("Contact Name") || listOfProjects.getSelectedItem().equals("Project Name"))
 		{
-			Connector con = new Connector(sesh.getServer());
-			jsonOutput = con.postJSON(jsonInput);
-		}
-		catch(Exception e)
-		{
-			System.out.println(sesh.getServer());
-			System.out.println(e);
-		}
-
-		// Load the info in the template.
-		details = gson.fromJson(jsonOutput, traceInfo.class);
-
-		if(details.getCode()>0)
-		{
-			// Set drop-down boxes.
-			listOfAccounts.setSelectedItem(details.getAccount());
-			listOfContacts.setSelectedItem(details.getLastName() + ", " + details.getFirstName());
-			listOfProjects.setSelectedItem(details.getProject());
-			traceTypeList.setSelectedItem(details.getType());			
-
-			// Set trace information
-			dateField.setText(details.getDate());
-			timeField.setText(details.getTime());
-			durationField.setText(Integer.toString(details.getDuration()));
-
-			completeBox.setSelected(details.getCompleted());
-
-			// Set trace information
-			subjectField.setText(details.getSubject());
-			detailsArea.setText(details.getText());	
+			// One of the fields weren't chosen.
+			// Error
+			
+			System.out.println("Please complete trace selection.");
+			return -2;
 		}
 		else
 		{
-			System.out.println(details.getMsg());
+		
+			System.out.println(timeField.getText());
+
+			details.setAccount((String)listOfAccounts.getSelectedItem());
+			details.setContact((String)listOfContacts.getSelectedItem());
+			details.setProject((String)listOfProjects.getSelectedItem());
+			details.setDate(dateField.getText());
+			details.setTime(timeField.getText());
+			details.setDuration(durationField.getText());
+			details.setType((String)listOfTypes.getSelectedItem());
+			details.setSubject(subjectField.getText());
+			details.setText(detailArea.getText());
+			details.setComplete(completeBox.isSelected());
+	
+			System.out.println(details.getTime());
+
+			return 1;
 		}
 	}
-
-	public boolean saveTrace(Session sesh)
-	{
-		System.out.println(details.getTraceID());
-		boolean result = false;
-		/*
-		if(validTraceInfo())
-		{
-			result = uploadTrace(sesh);
-		}
-		*/
-		return result;
-	}
-
-	public boolean uploadTrace(Session sesh)
-	{
-		Gson gson = new Gson();
-
-		String jsonOutput = "{\"msg\": \"connection error\", \"code\": -1}";
-		String jsonInput = "{\"cmd\": \"saveTrace\", \"trace_id\": \""
-				+ details.getTraceID() + "\", \"token\": \"" + sesh.getToken() + "\"}";
-		return true;
-	}
-
-	public void updateDropDowns(Session sesh, String selection)
-	{
-		getAccountContactList(sesh, accounts.getAccountID(selection));
-		getAccountProjectList(sesh, accounts.getAccountID(selection));
-	}
-
-	public boolean validateTraceInfo()
-	{
-		boolean testResult = false;
-
-		if(listOfAccounts.getSelectedIndex()>0)
-		{
-			testResult = true;
-		}
-		else
-		{
-			System.out.println("Please choose and account for this trace.");
-		}
-
-		if(listOfContacts.getSelectedIndex()>0)
-		{
-			testResult = true;
-		}
-		else
-		{
-			System.out.println("Please assign a contact to this trace.");
-		}
-
-		if(listOfProjects.getSelectedIndex()>0)
-		{
-		//	System.out.
-		}
-		else
-		{
-		}
-
-		return true;
-
-	}
-}
+}	

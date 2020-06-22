@@ -35,8 +35,6 @@ public class ContactsAPI extends APIResponseContainer
 		
 		if(name.length > 0)
 		{
-			System.out.println(name[1] + " " + name[0]);
-
 			for(int i=0; i<this.getNum(); i++)
 			{
 				if(contactList[i].last.equals(name[0]))
@@ -58,7 +56,18 @@ public class ContactsAPI extends APIResponseContainer
 	}
 	public String getFirstName(int i) { return contactList[i].first; }
 	public String getFullName(int i) { return contactList[i].last + ", " + contactList[i].first; }
-	public String getPosition(int i) { return contactList[i].last; }
+	public String getLastName(int i) { return contactList[i].last; }
+	public String getPosition(int i) { return contactList[i].position; }
+	public String getEmail(int i) { return contactList[i].email; }
+	public String getPhone(int i) { return contactList[i].phone; }
+	public boolean getIncludeInSearch(int i) { return contactList[i].includeInSearch; }
+
+	public void setFirstName(int i, String fname) { contactList[i].first = fname; }
+	public void setLastName(int i, String lname) { contactList[i].last = lname; }
+	public void setPosition(int i, String pos) { contactList[i].position = pos; }
+	public void setEmail(int i, String em) { contactList[i].email = em; }
+	public void setPhone(int i, String ph) { contactList[i].phone = ph; }
+	public void setIncludeInSearch(int i, boolean toInc) { contactList[i].includeInSearch = toInc; }
 
 	//================================================
 	// Inner Class
@@ -69,6 +78,10 @@ public class ContactsAPI extends APIResponseContainer
 		public String first = "Jean-Luc";
 		public String last = "Picard";
 		public String position = "Captain";
+		public String email = "this@example.com";
+		public String phone = "(555) 867-5309";
+		public boolean includeInSearch = false;
 		public int id = -99;
 	}
+
 }
