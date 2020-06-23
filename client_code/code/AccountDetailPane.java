@@ -401,9 +401,15 @@ public class AccountDetailPane extends JPanel
 		
 	public void saveContact(Session sesh, Connector cx)
 	{
+		// Error handling. Using If/Else If statements to keep this cleaner
+		// 	than using nested ifs.
+		if(accountID<0)
+		{
+			errorDialog("Please save the account befored adding a contact.");
+		}
 		// Ensure both first and last name were saved as a
 		// minimal input.
-		if(conFirstName.getText().equals("") || conLastName.getText().equals(""))
+		else if(conFirstName.getText().equals("") || conLastName.getText().equals(""))
 		{
 			errorDialog("Please input both a first and last name.");
 		}
@@ -423,7 +429,13 @@ public class AccountDetailPane extends JPanel
 
 	public void saveProject(Session sesh, Connector cx)
 	{
-		if(projectName.getText().equals(""))
+		// Error handling. Using If/Else If statements to keep this cleaner
+		// 	than using nested ifs.
+		if(accountID<0)
+		{
+			errorDialog("Please save the account befored adding a contact.");
+		}
+		else if(projectName.getText().equals(""))
 		{
 			errorDialog("Please input a project name.");
 		}

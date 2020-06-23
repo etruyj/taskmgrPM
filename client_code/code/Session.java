@@ -27,8 +27,6 @@ public class Session
 		token = "none";
 		serverAddress = "localhost";	
 		currentDate = today = formatter.format(date);
-
-		System.out.println(currentDate);
 	}
 
 	//==============================================
