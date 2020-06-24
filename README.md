@@ -1,4 +1,4 @@
-# taskmgrPM (Incomplete)
+# Task Manager (Incomplete)
 A simple task manager and  project management system based on MySQL, PHP, and HTML.
 
 Accounts, contacts, tasks (dubbed traces), and projects are stored in the database. Can be used as a very basic
@@ -51,6 +51,11 @@ Version 1.0
   - Active/Inactive checkbox for Account, Contact, and Project.
   
  Version 1.3
+  - Configuration Menu
+  - Add users from client
+  - Change password in client
+  - Configure saved hosts.
+  
  Version 2.0 - Reporting
  Version 3.0 - Expanded Project Management functionality
  
