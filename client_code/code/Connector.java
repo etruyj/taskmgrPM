@@ -79,7 +79,7 @@ public class Connector
 		return res.id;
 	}
 
-	public String decodeSaveMessage(String output)
+	public String decodeSaveMSG(String output)
 	{
 		APISimpleResponse res = gson.fromJson(output, APISimpleResponse.class);
 		return res.msg;
@@ -253,7 +253,10 @@ public class Connector
 		
 			while((response = in.readLine()) != null)
 			{
-				System.out.println(response);
+				// System.out.println(response) is
+				//  for error handling API calls. Comment
+				//  out before each version release or upload.
+				//System.out.println(response);
 				output = response;
 				
 			}

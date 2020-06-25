@@ -11,6 +11,7 @@ import javax.swing.JTextField;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Color;
 
 import java.awt.event.ActionListener;
 
@@ -23,12 +24,15 @@ public class LoginPane extends JPanel
 	private JTextField userBox;
 	private JTextField hostBox;
 	private JButton submitBTN;
+	private JLabel errorMessage;
 
 	public LoginPane()
 	{
 		JLabel userPrompt = new JLabel("Username:");
 		JLabel passPrompt = new JLabel("Password:");
 		JLabel hostPrompt = new JLabel("Server:");
+		errorMessage = new JLabel();
+		errorMessage.setForeground(Color.red);
 
 		userBox = new JTextField(10);
 		hostBox = new JTextField(10);
@@ -59,6 +63,7 @@ public class LoginPane extends JPanel
 		layout[8][1].add(hostPrompt);
 		layout[8][2].add(hostBox);
 		layout[9][2].add(submitBTN);
+		layout[10][2].add(errorMessage);
 	}
 
 	public void addBTNListener(ActionListener lis)
@@ -80,6 +85,15 @@ public class LoginPane extends JPanel
 		output = cx.postAPIRequest(cmdString);
 		sesh.setToken(cx.decodeLoginCall(output));
 
+		if(cx.decodeSaveCode(output)>0)
+		{
+			errorMessage.setText("");
+		}
+		else
+		{
+			errorMessage.setText(cx.decodeSaveMSG(output));
+		}
+	
 		return cx.decodeSaveCode(output); // Using this function which
 					// outputs the same value instead of 
 					// coding a duplicate function with a 
