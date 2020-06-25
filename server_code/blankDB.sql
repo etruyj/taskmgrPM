@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.30, for Linux (x86_64)
 --
--- Host: localhost    Database: tasksPMdb
+-- Host: localhost    Database: taskmgr
 -- ------------------------------------------------------
--- Server version	5.7.29-0ubuntu0.18.04.1
+-- Server version	5.7.30-0ubuntu0.18.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -54,8 +54,9 @@ CREATE TABLE `contacts` (
   `position` varchar(50) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `email` varchar(30) DEFAULT NULL,
+  `include_in_searches` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`contact_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -78,9 +79,11 @@ CREATE TABLE `projects` (
   `project_id` int(11) NOT NULL AUTO_INCREMENT,
   `project_name` varchar(50) NOT NULL,
   `account_id` int(11) DEFAULT NULL,
-  `contact_id` int(11) DEFAULT NULL,
+  `contact_id` int(11) DEFAULT '-1',
+  `isActive` tinyint(1) NOT NULL DEFAULT '1',
+  `isPMI_hours` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`project_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,6 +93,29 @@ CREATE TABLE `projects` (
 LOCK TABLES `projects` WRITE;
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `subjects`
+--
+
+DROP TABLE IF EXISTS `subjects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `subjects` (
+  `subject_id` int(11) NOT NULL AUTO_INCREMENT,
+  `subject` varchar(100) NOT NULL,
+  PRIMARY KEY (`subject_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `subjects`
+--
+
+LOCK TABLES `subjects` WRITE;
+/*!40000 ALTER TABLE `subjects` DISABLE KEYS */;
+/*!40000 ALTER TABLE `subjects` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -103,7 +129,7 @@ CREATE TABLE `text` (
   `text_id` int(11) NOT NULL AUTO_INCREMENT,
   `text` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`text_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,16 +150,19 @@ DROP TABLE IF EXISTS `traces`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `traces` (
   `trace_id` int(11) NOT NULL AUTO_INCREMENT,
-  `time` datetime DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `time` time DEFAULT NULL,
   `duration` int(11) DEFAULT NULL,
   `type` varchar(20) DEFAULT NULL,
   `contact_id` int(11) DEFAULT NULL,
+  `account_id` int(11) DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
+  `subject_id` int(11) DEFAULT NULL,
   `text_id` int(11) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   `completed` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`trace_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,7 +187,7 @@ CREATE TABLE `users` (
   `password` varchar(60) DEFAULT NULL,
   `userToken` varchar(20) NOT NULL,
   `contact_id` int(11) DEFAULT NULL,
-  `loginTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `loginTime` datetime DEFAULT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -208,4 +237,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-07 10:05:31
+-- Dump completed on 2020-06-24 15:41:51
