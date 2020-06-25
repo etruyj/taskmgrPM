@@ -1,4 +1,4 @@
-# Task Manager (Incomplete)
+# Task Manager (v1.0)
 A simple task manager and  project management system based on MySQL, PHP, and HTML.
 
 Accounts, contacts, tasks (dubbed traces), and projects are stored in the database. Can be used as a very basic
