@@ -364,7 +364,7 @@ public class AccountDetailPane extends JPanel
 
 	public void refreshProjectDetails(int id)
 	{
-		for(int i=0; i<contactList.getNum(); i++)
+		for(int i=0; i<projectList.getNum(); i++)
 		{
 			if(id == projectList.getProjectID(i))
 			{

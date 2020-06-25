@@ -95,7 +95,6 @@ public class AccountSearchPane extends JPanel
 		accountList = cx.decodeAllAccountsCall(output);
 		accountList.count();
 
-		System.out.println(cmdString);
 		resultsPanel.removeAll();
 
 		// Populate the search bar
