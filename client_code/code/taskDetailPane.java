@@ -8,14 +8,20 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;		// Just for Error Dialog
+import javax.swing.JFrame;		// Just for Error Dialog
+import javax.swing.JLabel;		// Just for Error Dialog
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;	// Just for Error Dialog
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Dimension;		// Just for Error Dialog
 
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;	// Just for Error Dialog
 import java.awt.event.ItemListener;
 
 public class TaskDetailPane extends JPanel
@@ -49,7 +55,7 @@ public class TaskDetailPane extends JPanel
 		details = new TraceInfoAPI();
 
 		// Component Definitions
-		String[] traceTypes = {"Email", "Installation", "Meeting - In Person", "Meeting - Virtual", "Project Work", "Support"};
+		String[] traceTypes = {"Email", "Meeting - In Person", "Meeting - Virtual", "On-Site Work", "Phone Call", "Project Work", "Support"};
 
 		listOfAccounts = new JComboBox();
 		listOfAccounts.addItem("Account Name");
@@ -65,6 +71,7 @@ public class TaskDetailPane extends JPanel
 		subjectField = new JTextField(20);
 
 		detailArea = new JTextArea(20, 30);
+		detailArea.setLineWrap(true);
 
 		completeBox = new JCheckBox("Completed");
 
@@ -132,6 +139,35 @@ public class TaskDetailPane extends JPanel
 		newTrace.addActionListener(lis);
 		saveTrace.addActionListener(lis);
 		cancelTrace.addActionListener(lis);
+	}
+
+	private void errorDialog(String errMSG)
+	{
+		JDialog erm = new JDialog((JFrame)SwingUtilities.windowForComponent(this), "Errror: Invalid Input");
+		JPanel pan = new JPanel();
+		pan.setLayout(new BorderLayout());
+		JLabel msg = new JLabel(errMSG);
+		JButton closeBTN = new JButton("Ok");
+		closeBTN.setPreferredSize(new Dimension(30, 30));
+		closeBTN.addActionListener(
+					new ActionListener()
+					{
+						public void actionPerformed(ActionEvent evt)
+						{
+							erm.dispose();
+						}
+					}
+				);
+		pan.add(msg, BorderLayout.CENTER);
+		pan.add(closeBTN, BorderLayout.SOUTH);
+
+		erm.add(pan);
+		erm.setPreferredSize(new Dimension(300, 200));
+		erm.pack();
+		erm.setLocationRelativeTo((JFrame)SwingUtilities.windowForComponent(this));
+
+		erm.setVisible(true);
+		erm.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	}
 
 	public int getAccountID(String acc_name)
@@ -219,8 +255,6 @@ public class TaskDetailPane extends JPanel
 
 	public void loadExistingTrace(int trace_id, Session sesh, Connector cx)
 	{
-		System.out.println(details.getCompleted());
-		
 		// Get trace details
 		String cmdString;
 		String output;
@@ -259,18 +293,53 @@ public class TaskDetailPane extends JPanel
 		completeBox.setSelected(details.getCompleted());
 	}
 
-	public void saveTrace(Session sesh, Connector cx)
+	public int saveTrace(Session sesh, Connector cx)
 	{
-		String cmdString;
-		String output;
+		// If/Else If Statements to parse a couple of error causing states.
+		// 	This structure will avoid pushing the indentations off the
+		// 	edge of the screen like nested ifs.
+		// 1.) The first dropdown boxes aren't selected.
+		// 2.) Date or time are blank
+		// 3.) Duration is blank or <=0
+		// 4.) Subject is blank
+		if(listOfAccounts.getSelectedItem().equals("Account Name") || listOfContacts.getSelectedItem().equals("Contact Name") || listOfProjects.getSelectedItem().equals("Project Name"))
+		{
+			errorDialog("Please assign trace to company, contact, and project.");
+		}
+		else if(dateField.getText().equals("") || timeField.getText().equals(""))
+		{
+			errorDialog("Please pick a date and time.");
+		}
+		else if(durationField.getText().equals("") || Integer.parseInt(durationField.getText())<=0)
+		{
+			errorDialog("Please pick a valid duration.");
+		}
+		else if(subjectField.getText().equals(""))
+		{
+			errorDialog("Please enter a subject/short description.");
+		}
+		else
+		{
+			// Okay, testing done. We're ready to save.
+			String cmdString;
+			String output;
 
-		writeToDetails();
+			writeToDetails();
 
-		cmdString = cx.generateSaveTraceString(details.getTraceID(), accountList.getAccountIDbyName(details.getAccount()), contactList.getContactIDbyName(details.getContact()), projectList.getProjectIDbyName(details.getProject()), Integer.valueOf(details.getDuration()), details.getDate(), details.getTime(), details.getType(), details.getSubject(), details.getText(), details.getCompleted(), sesh.getToken());
+			cmdString = cx.generateSaveTraceString(details.getTraceID(), accountList.getAccountIDbyName(details.getAccount()), contactList.getContactIDbyName(details.getContact()), projectList.getProjectIDbyName(details.getProject()), Integer.valueOf(details.getDuration()), details.getDate(), details.getTime(), details.getType(), details.getSubject(), details.getText(), details.getCompleted(), sesh.getToken());
 
-		System.out.println(cmdString);
+			output = cx.postAPIRequest(cmdString);
+		
+			// FUTURE VERSION
+			// Write code to assign the traceID back on here
+			// This way new traces can be created from the trace
+			// detail screen. A pop-up for saved successfully is
+			// also probably a good idea.
 
-		output = cx.postAPIRequest(cmdString);
+			return cx.decodeSaveCode(output); // Completed successfully
+		}
+		
+		return -1; // One of the error conditions were triggered
 	}
 
 	public int writeToDetails()
@@ -280,33 +349,17 @@ public class TaskDetailPane extends JPanel
 		// all updates and refreshing comes from this variable.
 		// The goal is to provide consistent behavior
 		
-		if(listOfAccounts.getSelectedItem().equals("Account Name") || listOfContacts.getSelectedItem().equals("Contact Name") || listOfProjects.getSelectedItem().equals("Project Name"))
-		{
-			// One of the fields weren't chosen.
-			// Error
-			
-			System.out.println("Please complete trace selection.");
-			return -2;
-		}
-		else
-		{
-		
-			System.out.println(timeField.getText());
-
-			details.setAccount((String)listOfAccounts.getSelectedItem());
-			details.setContact((String)listOfContacts.getSelectedItem());
-			details.setProject((String)listOfProjects.getSelectedItem());
-			details.setDate(dateField.getText());
-			details.setTime(timeField.getText());
-			details.setDuration(durationField.getText());
-			details.setType((String)listOfTypes.getSelectedItem());
-			details.setSubject(subjectField.getText());
-			details.setText(detailArea.getText());
-			details.setComplete(completeBox.isSelected());
+		details.setAccount((String)listOfAccounts.getSelectedItem());
+		details.setContact((String)listOfContacts.getSelectedItem());
+		details.setProject((String)listOfProjects.getSelectedItem());
+		details.setDate(dateField.getText());
+		details.setTime(timeField.getText());
+		details.setDuration(durationField.getText());
+		details.setType((String)listOfTypes.getSelectedItem());
+		details.setSubject(subjectField.getText());
+		details.setText(detailArea.getText());
+		details.setComplete(completeBox.isSelected());
 	
-			System.out.println(details.getTime());
-
-			return 1;
-		}
+		return 1;
 	}
 }	
