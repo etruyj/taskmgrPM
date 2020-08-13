@@ -193,8 +193,7 @@ public class taskmgr extends JFrame
 			switch(btn.getName())
 			{
 				case "New Account":
-					accountDetailScreen.refreshContactClear();
-					accountDetailScreen.refreshProjectClear();
+					accountDetailScreen.refreshAccountClear();
 					break;
 				case "Save Account":
 					accountDetailScreen.saveAccount(sesh, conn);
@@ -253,7 +252,7 @@ public class taskmgr extends JFrame
 					{
 						break;
 					}
-					break; // Comment out if saving should
+		//			break; // Comment out if saving should
 						// return to the task list pane
 				case "View List":
 				case "Cancel":
@@ -272,6 +271,7 @@ public class taskmgr extends JFrame
 					showCard("AccountSearch");
 					break;
 				case "Create Account": // Open a blank create account screen
+					accountDetailScreen.refreshAccountClear();
 					showCard("AccountDetails");
 					break;
 				case "Submit": // This is the login call

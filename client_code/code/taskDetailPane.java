@@ -270,12 +270,20 @@ public class TaskDetailPane extends JPanel
 		listOfProjects.setSelectedItem(details.getProject());
 		listOfTypes.setSelectedItem(details.getType());
 
+		// Insert Endlines (\n)
+		// Due to the limitation with our cURL API, endlines must
+		// be removed. &N is used in their place. To keep the format
+		// readable for our users, we'll replace that marker with
+		// the \n character.
+		String parsedString = details.getText();
+		parsedString = parsedString.replace("&N", "\n");
+
 		// Populate fields
 		dateField.setText(details.getDate());
 		timeField.setText(details.getTime());
 		durationField.setText(details.getDuration());
 		subjectField.setText(details.getSubject());
-		detailArea.setText(details.getText());
+		detailArea.setText(parsedString);
 		completeBox.setSelected(details.getCompleted());	
 	}
 	
@@ -348,7 +356,14 @@ public class TaskDetailPane extends JPanel
 		// This allows for consolidating changes to the traces as
 		// all updates and refreshing comes from this variable.
 		// The goal is to provide consistent behavior
-		
+	
+		// Remove Endline characters
+		// Endlines (\n) cannot be passed successfully by the cURL
+		// API. We'll be replacing the (\n) with &N for the time being
+		String parsedText = detailArea.getText();
+		parsedText = parsedText.replace("\n", "&N");
+
+		// Update the details variable with the fields.
 		details.setAccount((String)listOfAccounts.getSelectedItem());
 		details.setContact((String)listOfContacts.getSelectedItem());
 		details.setProject((String)listOfProjects.getSelectedItem());
@@ -357,7 +372,7 @@ public class TaskDetailPane extends JPanel
 		details.setDuration(durationField.getText());
 		details.setType((String)listOfTypes.getSelectedItem());
 		details.setSubject(subjectField.getText());
-		details.setText(detailArea.getText());
+		details.setText(parsedText);
 		details.setComplete(completeBox.isSelected());
 	
 		return 1;

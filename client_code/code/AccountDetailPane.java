@@ -92,7 +92,7 @@ public class AccountDetailPane extends JPanel
 		accBTNPane.setLayout(new FlowLayout());
 		
 		accountDetails = new JTextArea();
-		accountDetails.setText("We'll add this functionality later.");
+		accountDetails.setText("We'll add \nthis functionality later.");
 		accCancelButton = new JButton("Cancel");
 		accCancelButton.setName("Exit");
 		accNewButton = new JButton("New");
@@ -328,6 +328,21 @@ public class AccountDetailPane extends JPanel
 			project.setForeground(Color.gray);
 			projectWindow.add(project);
 		}
+	}
+
+	public void refreshAccountClear()
+	{
+		// Clear the Contact, Project, and Account Fields
+		refreshContactClear();
+		refreshProjectClear();
+
+		accountID = -1;
+		accountName = "none";
+		accountTitle.setText("Empty Account");
+
+		// Clear the list of projects and accounts
+		contactWindow.removeAll();
+		projectWindow.removeAll();
 	}
 
 	public void refreshContactClear()

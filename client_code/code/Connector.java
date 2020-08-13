@@ -256,7 +256,7 @@ public class Connector
 				// System.out.println(response) is
 				//  for error handling API calls. Comment
 				//  out before each version release or upload.
-				//System.out.println(response);
+				System.out.println(response);
 				output = response;
 				
 			}
