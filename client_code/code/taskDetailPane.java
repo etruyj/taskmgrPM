@@ -59,11 +59,15 @@ public class TaskDetailPane extends JPanel
 
 		listOfAccounts = new JComboBox();
 		listOfAccounts.addItem("Account Name");
+		listOfAccounts.setPrototypeDisplayValue("Account Name");
 		listOfContacts = new JComboBox();
 		listOfContacts.addItem("Contact Name");
+		listOfContacts.setPrototypeDisplayValue("Contact Name");
 		listOfProjects = new JComboBox();
 		listOfProjects.addItem("Project Name");
+		listOfProjects.setPrototypeDisplayValue("Project Name");
 		listOfTypes = new JComboBox(traceTypes);
+		listOfTypes.setPrototypeDisplayValue("abcdefghijk"); // Set to 11 chars
 
 		dateField = new JTextField(8);
 		timeField = new JTextField(5);
@@ -278,6 +282,12 @@ public class TaskDetailPane extends JPanel
 		String parsedString = details.getText();
 		parsedString = parsedString.replace("&N", "\n");
 
+		// Removing Escape Characters (\)
+		// Removing escape characters around quotation marks.
+		// These were breaking the cURL command.
+		// Using +' as the symble to represent the double quote.
+		parsedString = parsedString.replace("+'", String.valueOf('"')); 
+
 		// Populate fields
 		dateField.setText(details.getDate());
 		timeField.setText(details.getTime());
@@ -362,6 +372,13 @@ public class TaskDetailPane extends JPanel
 		// API. We'll be replacing the (\n) with &N for the time being
 		String parsedText = detailArea.getText();
 		parsedText = parsedText.replace("\n", "&N");
+
+		// Insert Escape Characters (\)
+		// Single quotes are breaking the cURLed JSON. Inserting
+		// escape characters into the string before writing the
+		// JSON. Using +' as the symbol to represent the double quote.
+		parsedText = parsedText.replace(String.valueOf('"'), "+'");
+		System.out.println(parsedText);
 
 		// Update the details variable with the fields.
 		details.setAccount((String)listOfAccounts.getSelectedItem());
