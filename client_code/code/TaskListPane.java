@@ -116,6 +116,11 @@ public class TaskListPane extends JPanel
 		
 	}
 
+	public void updateDateField(Session sesh)
+	{
+		dateField.setText(sesh.getCurrentDate());
+	}
+
 	public void updateTraceList(Session sesh, MouseListener mis, Connector cx)
 	{
 		// Get Traces From Database

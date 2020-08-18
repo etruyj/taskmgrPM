@@ -254,6 +254,7 @@ public class taskmgr extends JFrame
 					}
 		//			break; // Comment out if saving should
 						// return to the task list pane
+					taskScreen.updateDateField(sesh);
 				case "View List":
 				case "Cancel":
 				case "Change Date":
