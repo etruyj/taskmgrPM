@@ -7,7 +7,7 @@
 require_once 'identityFunctions.php';
 
 
-function saveAcount($acc_id, $acc_name, $pdo)
+function saveAccount($acc_id, $acc_name, $pdo)
 {
 	$result['code'] = 1;
 	

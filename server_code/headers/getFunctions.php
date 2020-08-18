@@ -39,7 +39,9 @@ function getAccountContacts($accountID, $pdo)
 			$result['contactList'][$i]['id'] 	= $res['contact_id'];
 			$result['contactList'][$i]['first'] 	= $res['first_name'];
 			$result['contactList'][$i]['last'] 	= $res['last_name'];
-			$result['contactList'][$i]['position'] = $res['position'];
+			$result['contactList'][$i]['position'] 	= $res['position'];
+			$result['contactList'][$i]['phone'] 	= $res['phone'];
+			$result['contactList'][$i]['email']	= $res['email'];
 			$i++;	
 		}
 	}
