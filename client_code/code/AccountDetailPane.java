@@ -411,6 +411,10 @@ public class AccountDetailPane extends JPanel
 			// Necessary to prevent saving duplicates if the save
 			// button is pressed more than once.
 			accountID = cx.decodeSaveID(output);
+		
+			String test = accountDetails.getText();
+			test = test.replace(String.valueOf('"'), "5");
+			System.out.println(test);
 		}
 	}
 		

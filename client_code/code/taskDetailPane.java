@@ -347,8 +347,9 @@ public class TaskDetailPane extends JPanel
 			cmdString = cx.generateSaveTraceString(details.getTraceID(), accountList.getAccountIDbyName(details.getAccount()), contactList.getContactIDbyName(details.getContact()), projectList.getProjectIDbyName(details.getProject()), Integer.valueOf(details.getDuration()), details.getDate(), details.getTime(), details.getType(), details.getSubject(), details.getText(), details.getCompleted(), sesh.getToken());
 
 			output = cx.postAPIRequest(cmdString);
-		
+				
 			// FUTURE VERSION
+			sesh.setCurrentDate(details.getDate());
 			// Write code to assign the traceID back on here
 			// This way new traces can be created from the trace
 			// detail screen. A pop-up for saved successfully is
