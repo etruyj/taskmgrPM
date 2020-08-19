@@ -57,8 +57,10 @@ public class Connector
 		}
 		else
 		{
-			System.out.println(rJson.getMsg());
-			return "Incorrect";
+			// System.out.println for debugging
+			// commented out for release.
+			// System.out.println(rJson.getMsg());
+			return "no-token";
 		}
 	}
 
@@ -242,6 +244,10 @@ public class Connector
 			server = new URL(address);
 
 			URLConnection cxn = server.openConnection();
+			// Five second connection timeout.
+			cxn.setConnectTimeout(5000);
+			// Ten second read timeout.
+			cxn.setReadTimeout(10000);
 			cxn.setDoOutput(true);
 
 			OutputStreamWriter out = new OutputStreamWriter(cxn.getOutputStream());
@@ -265,7 +271,7 @@ public class Connector
 		}
 		catch(Exception e)
 		{
-			System.out.println(e);
+			output = "{\"msg\":\"" + e + "\", \"code\": \"-2\"}";
 		}
 
 		return output;

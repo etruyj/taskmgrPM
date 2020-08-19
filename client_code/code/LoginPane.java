@@ -91,7 +91,19 @@ public class LoginPane extends JPanel
 		}
 		else
 		{
-			errorMessage.setText(cx.decodeSaveMSG(output));
+			if(cx.decodeSaveCode(output)==-2)
+			{
+				// ERR -2: Connection Timed out.
+				// The error message is longer than
+				// the JLabel, so we're using a 
+				// customer error message.
+				errorMessage.setText("Unable to Connect");
+			}
+			else
+			{
+				// API Error Messages
+				errorMessage.setText(cx.decodeSaveMSG(output));
+			}
 		}
 	
 		return cx.decodeSaveCode(output); // Using this function which
